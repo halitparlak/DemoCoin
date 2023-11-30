@@ -123,6 +123,7 @@ mysqli_close($baglanti);
 			</div>
 			<!--end::Authentication - Sign-in-->
 		</div>
+		<p>dsajdksajkdwjkawjkd</p>
 		<!--end::Main-->
 		<script>var hostUrl = "assets/";</script>
 		<!--begin::Javascript-->
