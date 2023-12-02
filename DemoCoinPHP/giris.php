@@ -111,7 +111,7 @@ mysqli_close($baglanti);
 								<!--end::Submit button-->
 								<!--begin::Separator-->
 							</div>
-							<p>sdkhahkdjksadsajk</p>
+							
 							<!--end::Actions-->
 						</form>
 						<!--end::Form-->
