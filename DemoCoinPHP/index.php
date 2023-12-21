@@ -100,10 +100,10 @@ License: For each use you must have a valid license purchased only from above li
             <th>Mevcut Arz</th>
             <th>İşlem Hacmi (24 Saat)</th>
             <th>Değişim (24 Saat)</th>
-            <th>işlemler</th>
+            <!-- <th>işlemler</th> -->
         </tr>
     </thead>
-    <tbody>
+    <tbody class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
     <?php
 
 // CoinCap API Endpoint'i
@@ -137,9 +137,9 @@ if ($data && isset($data['data'])) {
         echo '<td>' ." "."$". number_format($crypto['supply'],2)." "."m".'</td>';
         echo '<td>' ." "."$". number_format($crypto['volumeUsd24Hr'],2)." "."b".'</td>';
         echo '<td>' . number_format($crypto['changePercent24Hr'],2)."%".'</td>';
-        echo '<td>'.'<button type="button" class="btn btn-outline-success">AL</button>'.
-        '<button type="button" class="btn btn-outline-danger">SAT</button>'
-        .'</td';
+        // echo '<td>'.'<button type="button" class="btn btn-outline-success">AL</button>'.
+        // '<button type="button" class="btn btn-outline-danger">SAT</button>'
+        // .'</td';
         echo '</tr>';
     }
 } else {
@@ -180,6 +180,65 @@ if ($data && isset($data['data'])) {
 		<!--begin::Page Custom Javascript(used by this page)-->
 		<script src="assets/js/custom/landing.js"></script>
 		<script src="assets/js/custom/pages/company/pricing.js"></script>
+        <!-- Add this script block at the end of your HTML body, just before the closing </body> tag -->
+<script>
+    // Function to fetch and update data
+    function fetchData() {
+        // CoinCap API Endpoint and API Key
+        var apiEndpoint = 'https://api.coincap.io/v2/assets';
+        var apiKey = '0d031cac-8cb5-4e18-ad20-9bad23e57bdd';
+
+        // Perform AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', apiEndpoint + '?apiKey=' + apiKey, true);
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // Parse JSON response
+                var data = JSON.parse(xhr.responseText);
+
+                // Update table content
+                if (data && data.data) {
+                    var tableBody = document.querySelector('tbody');
+                    tableBody.innerHTML = ''; // Clear existing rows
+
+                    data.data.forEach(function (crypto) {
+                        var newRow = '<tr>' +
+                            '<td>' + crypto.name + '</td>' +
+                            '<td>' + "$" + number_format(crypto.priceUsd, 2) + " USD" + '</td>' +
+                            '<td>' + "$" + number_format(crypto.marketCapUsd) + " b" + '</td>' +
+                            '<td>' + "$" + number_format(crypto.supply, 2) + " m" + '</td>' +
+                            '<td>' + "$" + number_format(crypto.volumeUsd24Hr, 2) + " b" + '</td>' +
+                            '<td>' + number_format(crypto.changePercent24Hr, 2) + "%" + '</td>' +
+                            '<td>'+
+                            '</tr>';
+                        tableBody.innerHTML += newRow;
+                    });
+                }
+            } else {
+                console.error('Failed to fetch data. Status: ' + xhr.status);
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Network error occurred');
+        };
+
+        xhr.send();
+    }
+
+    // Function to format numbers with commas
+    function number_format(number, decimals) {
+        return parseFloat(number).toFixed(decimals).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    // Call fetchData function initially
+    fetchData();
+
+    // Set interval to call fetchData every 5 minutes (adjust as needed)
+    setInterval(fetchData, 1000); // 300,000 milliseconds = 5 minutes
+</script>
+
 		<!--end::Page Custom Javascript-->
 		<!--end::Javascript-->
 	</body>
