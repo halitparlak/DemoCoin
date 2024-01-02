@@ -1,3 +1,29 @@
+<?php
+// Veritabanı bağlantısı
+$host = "localhost";
+$kullanici = "root";
+$sifre = "";
+$veritabani= "varliklar";
+$tablo = "varliklar";
+
+$baglanti=mysqli_connect($host,$kullanici,$sifre);
+@mysqli_select_db($baglanti,$tablo);
+
+if (isset($_POST["buy"]) ) {
+    // POST verilerini al
+    $coinName = $_POST['coinname'];
+    $coinValue = $_POST['coinvalue'];
+
+    // Alım işlemi için gerekli kodu buraya ekleyin
+    // Örneğin, varlıklar tablosuna ekleme işlemi:
+	$ekle="INSERT INTO varliklar (coinname, coinvalue) VALUES ('$coinName','$coinValue')";
+    $calistirekle = mysqli_query($baglanti,$ekle);
+}
+
+mysqli_close($baglanti);
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 	<!--begin::Head-->
@@ -80,6 +106,7 @@
 					<!--begin::Landing hero-->
 	<div class="d-flex flex-column flex-center w-100 min-h-350px min-h-lg-500px px-9">
 						<!--begin::Heading-->
+	<form id="tradeform" method="post" action="anasayfa.php">
     <table class="table table-rounded table-striped border gy-7 gs-7">
 		<thead>
 			<tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
@@ -93,7 +120,7 @@
 			</tr>
 		</thead>
 		<tbody class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
-			<?php
+            <?php
 
 			// CoinCap API Endpoint'i
 			$apiEndpoint = 'https://api.coincap.io/v2/assets';
@@ -119,17 +146,20 @@
 			// Veriyi işleme
 			if ($data && isset($data['data'])) {
 				foreach ($data['data'] as $crypto) {
-					echo '<tr>';
+					echo "<form method='post' action='anasayfa.php'>";
+					echo '<tr id="'.$crypto['id'].'">';
 					echo '<td>' . $crypto['name'].'</td>';
 					echo '<td>' ." "."$". number_format($crypto['priceUsd'],2)." "."USD".'</td>';
 					echo '<td>' ." "."$". number_format($crypto['marketCapUsd'])." "."b".'</td>';
 					echo '<td>' ." "."$". number_format($crypto['supply'],2)." "."m".'</td>';
 					echo '<td>' ." "."$". number_format($crypto['volumeUsd24Hr'],2)." "."b".'</td>';
 					echo '<td>' . number_format($crypto['changePercent24Hr'],2)."%".'</td>';
-					// echo '<td>'.'<button type="button" class="btn btn-outline-success">AL</button>'.
-					// '<button type="button" class="btn btn-outline-danger">SAT</button>'
-					// .'</td';
+					echo "<input type='hidden' name='coinname' value='" . $crypto['name'] . "'>";
+    				echo "<input type='hidden' name='coinvalue' value='" . number_format($crypto['priceUsd'],2) . "'>";
+					echo '<td>'."<input type='submit' name='buy' id='buy' value='Al'>".'</td>';
+					echo "</form>";
 					echo '</tr>';
+					
 				}
 			} else {
 				echo "'API'den veri alınamadı.'";
@@ -137,7 +167,10 @@
 
 			?>
 		</tbody>
+
 	</table>
+	</form>
+
 						<div class="text-center mb-5 mb-lg-10 py-10 py-lg-20">
 						</div>
 						<!--end::Heading-->
@@ -170,63 +203,13 @@
 		<script src="assets/js/custom/landing.js"></script>
 		<script src="assets/js/custom/pages/company/pricing.js"></script>
         <!-- Add this script block at the end of your HTML body, just before the closing </body> tag -->
-<script>
-    // Function to fetch and update data
-    function fetchData() {
-        // CoinCap API Endpoint and API Key
-        var apiEndpoint = 'https://api.coincap.io/v2/assets';
-        var apiKey = '0d031cac-8cb5-4e18-ad20-9bad23e57bdd';
 
-        // Perform AJAX request
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', apiEndpoint + '?apiKey=' + apiKey, true);
 
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                // Parse JSON response
-                var data = JSON.parse(xhr.responseText);
 
-                // Update table content
-                if (data && data.data) {
-                    var tableBody = document.querySelector('tbody');
-                    tableBody.innerHTML = ''; // Clear existing rows
+<!-- ... (existing HTML code) ... -->
 
-                    data.data.forEach(function (crypto) {
-                        var newRow = '<tr>' +
-                            '<td>' + crypto.name + '</td>' +
-                            '<td>' + "$" + number_format(crypto.priceUsd, 2) + " USD" + '</td>' +
-                            '<td>' + "$" + number_format(crypto.marketCapUsd) + " b" + '</td>' +
-                            '<td>' + "$" + number_format(crypto.supply, 2) + " m" + '</td>' +
-                            '<td>' + "$" + number_format(crypto.volumeUsd24Hr, 2) + " b" + '</td>' +
-                            '<td>' + number_format(crypto.changePercent24Hr, 2) + "%" + '</td>' +
-                            '<td>'+
-                            '</tr>';
-                        tableBody.innerHTML += newRow;
-                    });
-                }
-            } else {
-                console.error('Failed to fetch data. Status: ' + xhr.status);
-            }
-        };
 
-        xhr.onerror = function () {
-            console.error('Network error occurred');
-        };
 
-        xhr.send();
-    }
-
-    // Function to format numbers with commas
-    function number_format(number, decimals) {
-        return parseFloat(number).toFixed(decimals).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    }
-
-    // Call fetchData function initially
-    fetchData();
-
-    // Set interval to call fetchData every 5 minutes (adjust as needed)
-    setInterval(fetchData, 60000); // 300,000 milliseconds = 5 minutes
-</script>
 
 		<!--end::Page Custom Javascript-->
 		<!--end::Javascript-->
