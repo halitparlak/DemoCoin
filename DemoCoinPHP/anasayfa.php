@@ -156,7 +156,7 @@ mysqli_close($baglanti);
 					echo '<td>' . number_format($crypto['changePercent24Hr'],2)."%".'</td>';
 					echo "<input type='hidden' name='coinname' value='" . $crypto['name'] . "'>";
     				echo "<input type='hidden' name='coinvalue' value='" . number_format($crypto['priceUsd'],2) . "'>";
-					echo '<td>'."<input type='submit' name='buy' id='buy' value='Al'>".'</td>';
+					echo '<td>'."<button type='submit' class='btn btn-outline-success' name='buy' id='buy' value='Al'>AL</button>".'</td>';
 					echo "</form>";
 					echo '</tr>';
 					
