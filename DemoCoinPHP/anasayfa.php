@@ -3,25 +3,35 @@
 $host = "localhost";
 $kullanici = "root";
 $sifre = "";
-$veritabani= "varliklar";
+$veritabani = "democoin";
 $tablo = "varliklar";
 
-$baglanti=mysqli_connect($host,$kullanici,$sifre);
-@mysqli_select_db($baglanti,$tablo);
+$baglanti = mysqli_connect($host, $kullanici, $sifre, $veritabani);
 
-if (isset($_POST["buy"]) ) {
+if (!$baglanti) {
+    die("Veritabanı bağlantısı başarısız: " . mysqli_connect_error());
+}
+
+if (isset($_POST["buy"])) {
     // POST verilerini al
     $coinName = $_POST['coinname'];
     $coinValue = $_POST['coinvalue'];
 
     // Alım işlemi için gerekli kodu buraya ekleyin
-    // Örneğin, varlıklar tablosuna ekleme işlemi:
-	$ekle="INSERT INTO varliklar (coinname, coinvalue) VALUES ('$coinName','$coinValue')";
-    $calistirekle = mysqli_query($baglanti,$ekle);
+    // Örneğin, varliklar tablosuna ekleme işlemi:
+    $ekle = "INSERT INTO $tablo (coinname, coinvalue) VALUES ('$coinName', '$coinValue')";
+    $calistirekle = mysqli_query($baglanti, $ekle);
+
+    if ($calistirekle) {
+        echo "Kayıt başarıyla eklendi.";
+    } else {
+        echo "Hata: " . mysqli_error($baglanti);
+    }
 }
 
 mysqli_close($baglanti);
 ?>
+
 
 
 <!DOCTYPE html>

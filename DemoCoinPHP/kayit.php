@@ -18,6 +18,7 @@ if(isset($_POST["kayit"]))
 
     $ekle="INSERT INTO democoin (isim, soyisim, email, telno, sifre) VALUES ('$name','$surname','$email','$phone','$password')";
     $calistirekle = mysqli_query($baglanti,$ekle);
+	
 }
 mysqli_close($baglanti);
 ?>
