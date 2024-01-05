@@ -98,7 +98,7 @@ mysqli_close($baglanti);
 								<label class="form-label fs-6 fw-bolder text-dark" for="email">Email</label>
 								<!--end::Label-->
 								<!--begin::Input-->
-								<input class="form-control form-control-lg form-control-solid" type="text" name="email" id="email" autocomplete="on" />
+								<input class="form-control form-control-lg form-control-solid" type="text" name="email" id="email" autocomplete="off" />
 								<!--end::Input-->
 							</div>
 							<!--end::Input group-->
