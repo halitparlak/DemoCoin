@@ -38,16 +38,20 @@ if (isset($_POST["buy"])) {
     // Örneğin, varliklar tablosuna ekleme işlemi:
     $ekle = "UPDATE users SET coin = CONCAT(coin, '$yaz') WHERE userid = $userID";
     $calistirekle = mysqli_query($baglanti, $ekle);
+	$jsonKayit = "UPDATE users
+	SET portfolio = JSON_SET(
+		COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
+		'$.BTC.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.BTC.amount')) AS DECIMAL(10,2)), 0) + 3.0 -- Eğer BTC.amount null ise 0'a ekle
+	)
+	WHERE userid = $userID";
+
+	$jsonKaydet = mysqli_query($baglanti,$jsonKayit);
 
 
-	$tokenCountQuery = "SELECT token FROM users WHERE userid = $userID";
-	$tokenResult = mysqli_query($baglanti, $tokenCountQuery);
-	$row = mysqli_fetch_assoc($tokenResult);
 
 
-	$nameQuery = "SELECT isim and soyisim FROM users WHERE userid = $userID";
-	$nameResults = mysqli_query($baglanti,$nameQuery);
-	$name = mysqli_fetch_assoc($nameResults);
+
+
 
 
 
@@ -59,6 +63,19 @@ if (isset($_POST["buy"])) {
         echo "Hata: " . mysqli_error($baglanti);
     }
 }
+
+$tokenCountQuery = "SELECT token FROM users WHERE userid = $userID";
+$tokenResult = mysqli_query($baglanti, $tokenCountQuery);
+$row = mysqli_fetch_assoc($tokenResult);
+
+
+$nameQuery = "SELECT isim FROM users WHERE userid = $userID";
+$nameResults = mysqli_query($baglanti,$nameQuery);
+$name = mysqli_fetch_assoc($nameResults);
+
+$surnameQuery = "SELECT soyisim FROM users WHERE userid = $userID";
+$surnameResults = mysqli_query($baglanti,$surnameQuery);
+$surname = mysqli_fetch_assoc($surnameResults);
 
 
 
@@ -137,8 +154,8 @@ mysqli_close($baglanti);
 								<!--end::Menu wrapper-->
 								<!--begin::Toolbar-->
 								<div class="flex-equal text-end ms-1">
-									<a href="giris.php" class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>
-                                    <a href="kayit.php" class="btn btn-outline-primary "><?php echo $name['isim'];  ?></a>
+									<a class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>
+                                    <a class="btn btn-outline-primary "><?php echo $name['isim']; echo ' '; echo $surname['soyisim']; ?></a>
 								</div>
 								<!--end::Toolbar-->
 							</div>
@@ -257,6 +274,7 @@ mysqli_close($baglanti);
 
 		<!--end::Page Custom Javascript-->
 		<!--end::Javascript-->
+
 	</body>
 	<!--end::Body-->
 </html>
