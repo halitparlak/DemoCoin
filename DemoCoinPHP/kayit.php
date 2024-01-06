@@ -3,10 +3,10 @@ $host="localhost";
 $kullanici="root";
 $sifre="";
 $veritabani="democoin";
-$tablo="democoin";
+$tablo="users";
 
 $baglanti=mysqli_connect($host,$kullanici,$sifre);
-@mysqli_select_db($baglanti,$tablo);
+@mysqli_select_db($baglanti,$veritabani);
 
 if(isset($_POST["kayit"]))
 {
@@ -16,7 +16,7 @@ if(isset($_POST["kayit"]))
     $email=$_POST["email"];
     $password=$_POST["sifre"];
 
-    $ekle="INSERT INTO democoin (isim, soyisim, email, telno, sifre) VALUES ('$name','$surname','$email','$phone','$password')";
+    $ekle="INSERT INTO users (isim, soyisim, email, telno, sifre) VALUES ('$name','$surname','$email','$phone','$password')";
     $calistirekle = mysqli_query($baglanti,$ekle);
 	
 }

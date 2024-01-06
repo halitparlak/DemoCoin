@@ -1,30 +1,42 @@
 <?php
-$host="localhost";
-$kullanici="root";
-$sifre="";
-$veritabani="democoin";
-$tablo="democoin";
+$host = "localhost";
+$kullanici = "root";
+$sifre = "";
+$veritabani = "democoin";
+$tablo = "users";
 
-$baglanti=mysqli_connect($host,$kullanici,$sifre);
-@mysqli_select_db($baglanti,$tablo); 
-if(isset($_POST["giris"]))
-{
+$baglanti = mysqli_connect($host, $kullanici, $sifre);
+@mysqli_select_db($baglanti, $veritabani);
+
+if (isset($_POST["giris"])) {
     $email = $_POST["email"];
     $sifre = $_POST["sifre"];
 
-     // Veritabanında kullanıcıyı kontrol et
-     $sql = "SELECT * FROM democoin WHERE email='$email' AND sifre='$sifre'";
-     $result = $baglanti->query($sql);
- 
-     if ($result->num_rows > 0) {
-         echo "Giriş başarılı!";
-     } else {
-         echo "Hatalı e-posta veya şifre";
-     }
-}
-mysqli_close($baglanti);
+    // Veritabanında kullanıcıyı kontrol et
+    $sql = "SELECT * FROM users WHERE email='$email' AND sifre='$sifre'";
+    $result = $baglanti->query($sql);
 
+    if ($result->num_rows > 0) {
+        // Giriş başarılıysa oturumu başlat
+        session_start();
+
+        // Kullanıcı bilgilerini oturumda sakla (örneğin, kullanıcı ID)
+        $row = $result->fetch_assoc();
+        $_SESSION['userid'] = $row['userid'];
+
+        // Başarılı giriş durumunda anasayfa.php'ye yönlendir
+        header("Location: anasayfa.php");
+        exit();
+    } else {
+        // Hatalı giriş durumunda hata mesajını ekrana yazdırabilir veya başka bir işlem yapabilirsiniz
+        echo "Hatalı e-posta veya şifre";
+    }
+}
+
+mysqli_close($baglanti);
 ?>
+
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>

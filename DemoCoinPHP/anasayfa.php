@@ -1,26 +1,57 @@
 <?php
+session_start();
+
 // Veritabanı bağlantısı
 $host = "localhost";
 $kullanici = "root";
 $sifre = "";
 $veritabani = "democoin";
-$tablo = "varliklar";
+$tablo = "users";
 
 $baglanti = mysqli_connect($host, $kullanici, $sifre, $veritabani);
-
 if (!$baglanti) {
     die("Veritabanı bağlantısı başarısız: " . mysqli_connect_error());
 }
+
+
+
+if (isset($_SESSION['userid'])) {
+    $user_id = $_SESSION['userid'];
+    // Kullanıcı ID'sini kullanarak istediğiniz işlemleri gerçekleştirin
+} else {
+    // Kullanıcı oturumu yoksa, giriş sayfasına yönlendirin veya başka bir işlem yapın
+    header("Location: giris.php");
+    exit();
+}
+
+
+// Giriş yapan kullanıcının ID'sini al
+$userID = $_SESSION['userid'];
 
 if (isset($_POST["buy"])) {
     // POST verilerini al
     $coinName = $_POST['coinname'];
     $coinValue = $_POST['coinvalue'];
-
+    $yaz = $coinName.','.$coinValue.';';
+	$coinCache = "SELECT coin FROM users WHERE userid = $userID";
     // Alım işlemi için gerekli kodu buraya ekleyin
     // Örneğin, varliklar tablosuna ekleme işlemi:
-    $ekle = "INSERT INTO $tablo (coinname, coinvalue) VALUES ('$coinName', '$coinValue')";
+    $ekle = "UPDATE users SET coin = CONCAT(coin, '$yaz') WHERE userid = $userID";
     $calistirekle = mysqli_query($baglanti, $ekle);
+
+
+	$tokenCountQuery = "SELECT token FROM users WHERE userid = $userID";
+	$tokenResult = mysqli_query($baglanti, $tokenCountQuery);
+	$row = mysqli_fetch_assoc($tokenResult);
+
+
+	$nameQuery = "SELECT isim and soyisim FROM users WHERE userid = $userID";
+	$nameResults = mysqli_query($baglanti,$nameQuery);
+	$name = mysqli_fetch_assoc($nameResults);
+
+
+
+
 
     if ($calistirekle) {
         echo "Kayıt başarıyla eklendi.";
@@ -29,8 +60,11 @@ if (isset($_POST["buy"])) {
     }
 }
 
+
+
 mysqli_close($baglanti);
 ?>
+
 
 
 
@@ -103,8 +137,8 @@ mysqli_close($baglanti);
 								<!--end::Menu wrapper-->
 								<!--begin::Toolbar-->
 								<div class="flex-equal text-end ms-1">
-									<a href="giris.php" class="btn btn-outline-success ">Giriş Yap</a>
-                                    <a href="kayit.php" class="btn btn-outline-primary ">Kayıt Ol</a>
+									<a href="giris.php" class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>
+                                    <a href="kayit.php" class="btn btn-outline-primary "><?php echo $name['isim'];  ?></a>
 								</div>
 								<!--end::Toolbar-->
 							</div>
