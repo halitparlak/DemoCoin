@@ -184,7 +184,7 @@ mysqli_close($baglanti);
 									</button>
 									<!--end::Mobile menu toggle-->
 									<!--begin::Logo image-->
-									<a href="../../demo1/dist/landing.html">
+									<a href="#">
 										<img alt="Logo"  class="logo-default h-25px h-lg-30px" />
 										<img alt="Logo"  class="logo-sticky h-20px h-lg-25px" />
 									</a>
@@ -203,7 +203,7 @@ mysqli_close($baglanti);
 								<div class="flex-equal text-end ms-1">		
 									<a class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>		
 									<a href="yukleme.php" class="btn btn-outline-success ">Token Yükle</a>					
-                                    <a class="btn btn-outline-primary "><?php echo $name['isim']; echo ' '; echo $surname['soyisim']; ?></a>
+                                    <a href="portfoy.php" class="btn btn-outline-primary "><?php echo $name['isim']; echo ' '; echo $surname['soyisim']; ?></a>
 									<!-- <form action="yukleme.php">
 										<button type='submit' formmethod='post' class='btn btn-outline-success' name='miktar' id='miktar' value=''>Token Yükle</button>
 									</form> -->
