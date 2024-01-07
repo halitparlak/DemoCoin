@@ -13,8 +13,6 @@ if (!$baglanti) {
     die("Veritabanı bağlantısı başarısız: " . mysqli_connect_error());
 }
 
-
-
 if (isset($_SESSION['userid'])) {
     $user_id = $_SESSION['userid'];
     // Kullanıcı ID'sini kullanarak istediğiniz işlemleri gerçekleştirin
@@ -28,54 +26,103 @@ if (isset($_SESSION['userid'])) {
 // Giriş yapan kullanıcının ID'sini al
 $userID = $_SESSION['userid'];
 
-if (isset($_POST["buy"])) {
-    // POST verilerini al
-    $coinName = $_POST['coinname'];
-    $coinValue = $_POST['coinvalue'];
-    $yaz = $coinName.','.$coinValue.';';
-	$coinCache = "SELECT coin FROM users WHERE userid = $userID";
-    // Alım işlemi için gerekli kodu buraya ekleyin
-    // Örneğin, varliklar tablosuna ekleme işlemi:
-    $ekle = "UPDATE users SET coin = CONCAT(coin, '$yaz') WHERE userid = $userID";
-    $calistirekle = mysqli_query($baglanti, $ekle);
-	$jsonKayit = "UPDATE users
-	SET portfolio = JSON_SET(
-		COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
-		'$.BTC.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.BTC.amount')) AS DECIMAL(10,2)), 0) + 3.0 -- Eğer BTC.amount null ise 0'a ekle
-	)
-	WHERE userid = $userID";
+$alisAdet = 1.00;
+$satisAdet = 1.00;
 
-	$jsonKaydet = mysqli_query($baglanti,$jsonKayit);
-
-
-
-
-
-
-
-
-
-
-
-    if ($calistirekle) {
-        echo "Kayıt başarıyla eklendi.";
-    } else {
-        echo "Hata: " . mysqli_error($baglanti);
-    }
-}
-
+//token alma
 $tokenCountQuery = "SELECT token FROM users WHERE userid = $userID";
 $tokenResult = mysqli_query($baglanti, $tokenCountQuery);
 $row = mysqli_fetch_assoc($tokenResult);
+$tokenCount = $row['token'];
 
-
+//isim alma
 $nameQuery = "SELECT isim FROM users WHERE userid = $userID";
 $nameResults = mysqli_query($baglanti,$nameQuery);
 $name = mysqli_fetch_assoc($nameResults);
 
+//soyisim alma
 $surnameQuery = "SELECT soyisim FROM users WHERE userid = $userID";
 $surnameResults = mysqli_query($baglanti,$surnameQuery);
 $surname = mysqli_fetch_assoc($surnameResults);
+
+if (isset($_POST['sell'])) {
+
+	$coinName = $_POST['coinname'];
+	$coinisim = $_POST['coinname'];
+    $coinValue = $_POST['coinvalue'];
+	$coinValue2 = (float) str_replace(',', '', $coinValue);
+	/* echo $coinValue2; */
+	$coinValue3 = intval($coinValue2);
+	/* echo $coinValue3; */
+
+	$coinAmount = null;
+
+	$coinAmountQuery = "SELECT JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS amount
+	FROM users
+	WHERE userid = $userID
+	AND JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim')) IS NOT NULL";
+	$coinAmountResult = mysqli_query($baglanti, $coinAmountQuery);
+	$dizi = mysqli_fetch_assoc($coinAmountResult);
+	$coinAmount = $dizi['amount'];
+
+	if($coinAmount<=0){
+
+		echo'Elinizde satabilecek coin bulunmamaktadir!';
+	} else {
+
+		$jsonKayit = "UPDATE users
+		SET portfolio = JSON_SET(
+			COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
+			'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) - '$satisAdet' -- Eğer BTC.amount null ise 0'a ekle
+		)
+		WHERE userid = $userID";
+		$jsonKaydet = mysqli_query($baglanti,$jsonKayit);
+
+		$newTokenCount = $tokenCount+$coinValue3;
+		$newTokenCountQuery = "UPDATE users SET token=$newTokenCount WHERE userid='$userID'";
+		$newTokenKaydet = mysqli_query($baglanti,$newTokenCountQuery);
+		$jsonKayit = "UPDATE users
+	SET portfolio = JSON_SET(
+		COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
+		'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) + 1.0 -- Eğer BTC.amount null ise 0'a ekle
+	)
+	WHERE userid = $userID";
+	$jsonKaydet = mysqli_query($baglanti,$jsonKayit);
+
+	}
+	
+
+}
+
+if (isset($_POST["buy"])) {
+    // POST verilerini al
+    $coinName = $_POST['coinname'];
+	$coinisim = $_POST['coinname'];
+    $coinValue = $_POST['coinvalue'];
+	/* echo $coinValue; */
+	$coinValue2 = (float) str_replace(',', '', $coinValue);
+	/* echo $coinValue2; */
+	$coinValue3 = intval($coinValue2);
+	/* echo $coinValue3; */
+	if($tokenCount>=$coinValue3){
+		$newTokenCount = $tokenCount-$coinValue3;
+		$newTokenCountQuery = "UPDATE users SET token=$newTokenCount WHERE userid='$userID'";
+		$newTokenKaydet = mysqli_query($baglanti,$newTokenCountQuery);
+		$jsonKayit = "UPDATE users
+	SET portfolio = JSON_SET(
+		COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
+		'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) + 1.0 -- Eğer BTC.amount null ise 0'a ekle
+	)
+	WHERE userid = $userID";
+	$jsonKaydet = mysqli_query($baglanti,$jsonKayit);
+	echo"Alim gerceklesti";
+
+	} else {
+		echo"Yetersiz Bakiye";
+	}
+
+}
+
 
 
 
@@ -153,9 +200,14 @@ mysqli_close($baglanti);
 								</div>
 								<!--end::Menu wrapper-->
 								<!--begin::Toolbar-->
-								<div class="flex-equal text-end ms-1">
-									<a class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>
+								<div class="flex-equal text-end ms-1">		
+									<a class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>		
+									<a href="yukleme.php" class="btn btn-outline-success ">Token Yükle</a>					
                                     <a class="btn btn-outline-primary "><?php echo $name['isim']; echo ' '; echo $surname['soyisim']; ?></a>
+									<!-- <form action="yukleme.php">
+										<button type='submit' formmethod='post' class='btn btn-outline-success' name='miktar' id='miktar' value=''>Token Yükle</button>
+									</form> -->
+	
 								</div>
 								<!--end::Toolbar-->
 							</div>
@@ -177,7 +229,7 @@ mysqli_close($baglanti);
 				<th>Mevcut Arz</th>
 				<th>İşlem Hacmi (24 Saat)</th>
 				<th>Değişim (24 Saat)</th>
-				<!-- <th>işlemler</th> -->
+				<!-- <th colspan="2">işlemler</th> -->
 			</tr>
 		</thead>
 		<tbody class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
@@ -218,6 +270,8 @@ mysqli_close($baglanti);
 					echo "<input type='hidden' name='coinname' value='" . $crypto['name'] . "'>";
     				echo "<input type='hidden' name='coinvalue' value='" . number_format($crypto['priceUsd'],2) . "'>";
 					echo '<td>'."<button type='submit' class='btn btn-outline-success' name='buy' id='buy' value='Al'>AL</button>".'</td>';
+					echo '<td>'."<button type='submit' class='btn btn-outline-success' name='sell' id='sell' value='Sat'>SAT</button>".'</td>';
+
 					echo "</form>";
 					echo '</tr>';
 					

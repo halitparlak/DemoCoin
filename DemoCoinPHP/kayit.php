@@ -96,7 +96,7 @@ License: For each use you must have a valid license purchased only from above li
 								<h1 class="text-dark mb-3">Kayıt Ol</h1>
 								<!--end::Title-->
 								<!--begin::Link-->
-								<div class="text-gray-400 fw-bold fs-4">Hesabınız Var Mı??
+								<div class="text-gray-400 fw-bold fs-4">Hesabınız Var Mı?
 								<a href="giris.php" class="link-primary fw-bolder">Giriş Yap</a></div>
 								<!--end::Link-->
 							</div>
