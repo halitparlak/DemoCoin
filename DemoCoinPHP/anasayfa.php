@@ -199,8 +199,8 @@ mysqli_close($baglanti);
 							<!--end::Menu wrapper-->
 							<!--begin::Toolbar-->
 							<div class="flex-equal text-end ms-1">
+								<a href="yukleme.php" class="btn btn-outline-info ">Token Yükle</a>
 								<a class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>
-								<a href="yukleme.php" class="btn btn-outline-success ">Token Yükle</a>
 								<a href="portfoy.php" class="btn btn-outline-primary "><?php echo $name['isim'];
 																						echo ' ';
 																						echo $surname['soyisim']; ?></a>
@@ -223,13 +223,13 @@ mysqli_close($baglanti);
 						<table class="table table-rounded table-striped border gy-7 gs-7">
 							<thead>
 								<tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
-									<th>Coin</th>
-									<th>Güncel Fiyat</th>
-									<th>Piyasa Değeri</th>
-									<th>Mevcut Arz</th>
-									<th>İşlem Hacmi (24 Saat)</th>
-									<th>Değişim (24 Saat)</th>
-									<!-- <th colspan="2">işlemler</th> -->
+									<th><h2>Coin</h2></th>
+									<th><h2>Güncel Fiyat</h2></th>
+									<th><h2>Piyasa Değeri</h2></th>
+									<th><h2>Mevcut Arz</h2></th>
+									<th><h2>İşlem Hacmi (24 Saat)</h2></th>
+									<th><h2>Değişim (24 Saat)</h2></th>
+									<th colspan="2"><h2>İşlemler</h2></th>
 								</tr>
 							</thead>
 							<tbody class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
@@ -266,11 +266,17 @@ mysqli_close($baglanti);
 										echo '<td>' . " " . "$" . number_format($crypto['marketCapUsd']) . " " . "b" . '</td>';
 										echo '<td>' . " " . "$" . number_format($crypto['supply'], 2) . " " . "m" . '</td>';
 										echo '<td>' . " " . "$" . number_format($crypto['volumeUsd24Hr'], 2) . " " . "b" . '</td>';
-										echo '<td>' . number_format($crypto['changePercent24Hr'], 2) . "%" . '</td>';
+										// echo '<td>' . number_format($crypto['changePercent24Hr'], 2) . "%" . '</td>';
+										$changePercent24Hr = $crypto['changePercent24Hr'];
+										$changePercent24HrFormatted = number_format($changePercent24Hr, 2) . "%";
+										$color = ($changePercent24Hr < 0) ? 'red' : 'green';
+
+										// Yazı rengini uygula
+										echo '<td style="color: ' . $color . ';">' . $changePercent24HrFormatted . '</td>';
 										echo "<input type='hidden' name='coinname' value='" . $crypto['name'] . "'>";
 										echo "<input type='hidden' name='coinvalue' value='" . number_format($crypto['priceUsd'], 2) . "'>";
 										echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='buy' id='buy' value='Al'>AL</button>" . '</td>';
-										echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='sell' id='sell' value='Sat'>SAT</button>" . '</td>';
+										echo '<td>' . "<button type='submit' class='btn btn-outline-danger' name='sell' id='sell' value='Sat'>SAT</button>" . '</td>';
 
 										echo "</form>";
 										echo '</tr>';

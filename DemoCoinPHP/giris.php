@@ -126,7 +126,6 @@ mysqli_close($baglanti);
 								<label class="form-label fw-bolder text-dark fs-6 mb-0" for="sifre">Şifre</label>
 								<!--end::Label-->
 								<!--begin::Link-->
-								<a href="#" class="link-primary fs-6 fw-bolder">Şifreni mi unuttun?</a>
 								<!--end::Link-->
 							</div>
 							<!--end::Wrapper-->

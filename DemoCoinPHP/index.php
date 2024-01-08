@@ -264,12 +264,24 @@
 						<table class="table table-rounded table-striped border gy-7 gs-7" style="width: 95%;">
 							<thead>
 								<tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
-									<th>Coin</th>
-									<th>Güncel Fiyat</th>
-									<th>Piyasa Değeri</th>
-									<th>Mevcut Arz</th>
-									<th>İşlem Hacmi (24 Saat)</th>
-									<th>Değişim (24 Saat)</th>
+									<th>
+										<h2>Coin</h2>
+									</th>
+									<th>
+										<h2>Güncel Fiyat</h2>
+									</th>
+									<th>
+										<h2>Piyasa Değeri</h2>
+									</th>
+									<th>
+										<h2>Mevcut Arz</h2>
+									</th>
+									<th>
+										<h2>İşlem Hacmi (24 Saat)</h2>
+									</th>
+									<th>
+										<h2>Değişim (24 Saat)</h2>
+									</th>
 								</tr>
 							</thead>
 							<tbody class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
@@ -292,7 +304,20 @@
 										echo '<td>' . "$" . number_format($crypto['marketCapUsd']) . " b" . '</td>';
 										echo '<td>' . "$" . number_format($crypto['supply'], 2) . " m" . '</td>';
 										echo '<td>' . "$" . number_format($crypto['volumeUsd24Hr'], 2) . " b" . '</td>';
-										echo '<td>' . number_format($crypto['changePercent24Hr'], 2) . "%" . '</td>';
+										// echo '<td>' . number_format($crypto['changePercent24Hr'], 2) . "%" . '</td>';
+										$changePercent24Hr = $crypto['changePercent24Hr'];
+										$changePercent24HrFormatted = number_format($changePercent24Hr, 2) . "%";
+
+										// Belirtilen koşula göre yazı rengini ayarla
+										$color = ($changePercent24Hr < 0) ? 'red' : 'green';
+
+										// Yazı rengini uygula
+										echo '<td style="color: ' . $color . ';">' . $changePercent24HrFormatted . '</td>';
+
+										echo "<input type='hidden' name='coinname' value='" . $crypto['name'] . "'>";
+										echo "<input type='hidden' name='coinvalue' value='" . number_format($crypto['priceUsd'], 2) . "'>";
+										// echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='buy' id='buy' value='Al'>AL</button>" . '</td>';
+										// echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='sell' id='sell' value='Sat'>SAT</button>" . '</td>';
 										echo '</tr>';
 									}
 								} else {
@@ -337,14 +362,16 @@
 						var tableBody = document.querySelector('tbody');
 						tableBody.innerHTML = '';
 						data.data.forEach(function(crypto) {
+							var changePercent24Hr = parseFloat(crypto.changePercent24Hr);
+							var color = (changePercent24Hr < 0) ? 'red' : 'green';
+
 							var newRow = '<tr>' +
 								'<td>' + crypto.name + '</td>' +
 								'<td>' + "$" + number_format(crypto.priceUsd, 2) + " USD" + '</td>' +
 								'<td>' + "$" + number_format(crypto.marketCapUsd) + " b" + '</td>' +
 								'<td>' + "$" + number_format(crypto.supply, 2) + " m" + '</td>' +
 								'<td>' + "$" + number_format(crypto.volumeUsd24Hr, 2) + " b" + '</td>' +
-								'<td>' + number_format(crypto.changePercent24Hr, 2) + "%" + '</td>' +
-								'<td>' +
+								'<td style="color: ' + color + ';">' + number_format(crypto.changePercent24Hr, 2) + "%" + '</td>' +
 								'</tr>';
 							tableBody.innerHTML += newRow;
 						});
