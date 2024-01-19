@@ -1,9 +1,12 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 	<base href="">
 	<title>DemoCoin</title>
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta charset="utf-8" />
 	<meta property="og:locale" content="en_US" />
@@ -18,7 +21,8 @@
 	<link href="assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body id="kt_body" data-bs-spy="scroll" data-bs-target="#kt_landing_menu" data-bs-offset="200" class="bg-white position-relative">
+<body  id="kt_body" data-bs-spy="scroll" data-bs-target="#kt_landing_menu" data-bs-offset="200" class="bg-white position-relative">
+
 	<div class="d-flex flex-column flex-root">
 		<div class="mb-0" id="home">
 			<div class="bgi-no-repeat bgi-size-contain bgi-position-x-center bgi-position-y-bottom ">
@@ -35,7 +39,7 @@
 									</span>
 								</button>
 								<a href="#">
-									<img alt="Logo" class="logo-default h-25px h-lg-30px" />
+								<img src="assets/media/logos/logo.png" alt="Logo" class="logo-default h-50px h-lg-60px" />
 									<img alt="Logo" class="logo-sticky h-20px h-lg-25px" />
 								</a>
 							</div>
@@ -50,7 +54,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="d-flex flex-column flex-center w-100 min-h-350px min-h-lg-500px px-9">
+				<div  class="d-flex flex-column flex-center w-100 min-h-350px min-h-lg-500px px-9">
 					<div class="d-flex">
 						<!-- Sol sütun başlangıcı -->
 						<div id="soldiv" style="width: 15%;">
@@ -261,7 +265,7 @@
 						</div>
 						<!-- Sol sütun bitişi -->
 						<!-- Tablo başlangıcı -->
-						<table class="table table-rounded table-striped border gy-7 gs-7" style="width: 95%;">
+						<table class="table table-rounded table-striped table-light border gy-7 gs-7" style="width: 95%;">
 							<thead>
 								<tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
 									<th>
@@ -441,6 +445,44 @@
       "theme": "prism",
       "themeColor": "#2563eb"
   });
+</script>
+
+<script>
+	function merhaba() {
+    var solDiv = document.querySelector("#soldiv");
+    var cardlar = solDiv.querySelectorAll(".card");
+
+    var cardBilgileri = Array.from(cardlar).map(function(card) {
+        return {
+            element: card,
+            icerik: card.innerHTML
+        };
+    });
+
+    cardBilgileri.sort(function() {
+        return 0.5 - Math.random();
+    });
+
+    for (var i = 0; i < cardBilgileri.length; i++) {
+        solDiv.appendChild(cardBilgileri[i].element);
+    }
+};
+merhaba();
+</script>
+
+<script>
+ function yenileSayfa() {
+    location.reload();
+ }
+
+ window.onload = function() {
+    if (window.sessionStorage.getItem("yenilenmis") !== "true") {
+      window.sessionStorage.setItem("yenilenmis", "true");
+      yenileSayfa();
+    } else {
+      window.sessionStorage.removeItem("yenilenmis");
+    }
+ };
 </script>
 </body>
 

@@ -26,19 +26,10 @@ if (isset($_SESSION['userid'])) {
 // Giriş yapan kullanıcının ID'sini al
 $userID = $_SESSION['userid'];
 
-// POST edilen veriyi al
-
-
 $alisAdet = 1.00;
+
+
 $satisAdet = 1.00;
-if (isset($_POST['girdi'])) {
-
-	$phpDegiskeni = $_POST['girdi'];
-} else {
-	$phpDegiskeni = 1.00;
-}
-
-
 
 //token alma
 $tokenCountQuery = "SELECT token FROM users WHERE userid = $userID";
@@ -58,83 +49,76 @@ $surname = mysqli_fetch_assoc($surnameResults);
 
 if (isset($_POST['sell'])) {
 
-	if ($phpDegiskeni > 0) {
+	$coinName = $_POST['coinname'];
+	$coinisim = $_POST['coinname'];
+	$coinValue = $_POST['coinvalue'];
+	$coinValue2 = (float) str_replace(',', '', $coinValue);
+	/* echo $coinValue2; */
+	$coinValue3 = intval($coinValue2);
+	/* echo $coinValue3; */
 
-		//$phpDegiskeni = $_POST['girdi'];
+	$coinAmount = null;
 
-		$coinName = $_POST['coinname'];
-		$coinisim = $_POST['coinname'];
-		$coinValue = $_POST['coinvalue'];
-		$coinValue2 = (float) str_replace(',', '', $coinValue);
-		/* echo $coinValue2; */
-		$coinValue3 = intval($coinValue2) * $phpDegiskeni;
-		/* echo $coinValue3; */
-
-		$coinAmount = null;
-
-		$coinAmountQuery = "SELECT JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS amount
+	$coinAmountQuery = "SELECT JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS amount
 	FROM users
 	WHERE userid = $userID
 	AND JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim')) IS NOT NULL";
-		$coinAmountResult = mysqli_query($baglanti, $coinAmountQuery);
-		$dizi = mysqli_fetch_assoc($coinAmountResult);
-		$coinAmount = $dizi['amount'];
+	$coinAmountResult = mysqli_query($baglanti, $coinAmountQuery);
+	$dizi = mysqli_fetch_assoc($coinAmountResult);
+	$coinAmount = $dizi['amount'];
 
-		if ($coinAmount < $phpDegiskeni) {
+	if ($coinAmount <= 0) {
 
-			echo '<script>alert("Elinizde ' . $phpDegiskeni . ' adet satabilecek ' .  $coinisim . ' bulunmamaktadir!"); </script>';
-		} else {
+		echo 'Elinizde satabilecek coin bulunmamaktadir!';
+	} else {
 
-			$newTokenCount = $tokenCount + $coinValue3;
-			$newTokenCountQuery = "UPDATE users SET token=$newTokenCount WHERE userid='$userID'";
-			$newTokenKaydet = mysqli_query($baglanti, $newTokenCountQuery);
-			$jsonKayit = "UPDATE users
+		$jsonKayit = "UPDATE users
+		SET portfolio = JSON_SET(
+			COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
+			'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) - '$satisAdet' -- Eğer BTC.amount null ise 0'a ekle
+		)
+		WHERE userid = $userID";
+		$jsonKaydet = mysqli_query($baglanti, $jsonKayit);
+
+		$newTokenCount = $tokenCount + $coinValue3;
+		$newTokenCountQuery = "UPDATE users SET token=$newTokenCount WHERE userid='$userID'";
+		$newTokenKaydet = mysqli_query($baglanti, $newTokenCountQuery);
+		$jsonKayit = "UPDATE users
 	SET portfolio = JSON_SET(
 		COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
-		'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) - '$phpDegiskeni' -- Eğer BTC.amount null ise 0'a ekle
+		'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) + '$alisAdet' -- Eğer BTC.amount null ise 0'a ekle
 	)
 	WHERE userid = $userID";
-			$jsonKaydet = mysqli_query($baglanti, $jsonKayit);
-			echo '<script>alert(" ' . $phpDegiskeni . ' adet ' .  $coinisim . ' satışınız gerçekleşmiştir!"); </script>';
-			header("Refresh:0");
-		}
-	} else {
-		echo '<script> alert("Satış adedine sıfır ve negatif değerler girilemez."); </script>';
+		$jsonKaydet = mysqli_query($baglanti, $jsonKayit);
+		header("Refresh:0");
 	}
 }
 
 if (isset($_POST["buy"])) {
-
-	if ($phpDegiskeni > 0) {
-
-
-		//$phpDegiskeni = $_POST['girdi'];
-		// POST verilerini al
-		$coinName = $_POST['coinname'];
-		$coinisim = $_POST['coinname'];
-		$coinValue = $_POST['coinvalue'];
-		/* echo $coinValue; */
-		$coinValue2 = (float) str_replace(',', '', $coinValue);
-		/* echo $coinValue2; */
-		$coinValue3 = intval($coinValue2) * $phpDegiskeni; //aldigi adet kadar dusup yukseltmek icin
-		/* echo $coinValue3; */
-		if ($tokenCount >= $coinValue3) {
-			$newTokenCount = $tokenCount - $coinValue3;
-			$newTokenCountQuery = "UPDATE users SET token=$newTokenCount WHERE userid='$userID'";
-			$newTokenKaydet = mysqli_query($baglanti, $newTokenCountQuery);
-			$jsonKayit = "UPDATE users
+	// POST verilerini al
+	$coinName = $_POST['coinname'];
+	$coinisim = $_POST['coinname'];
+	$coinValue = $_POST['coinvalue'];
+	/* echo $coinValue; */
+	$coinValue2 = (float) str_replace(',', '', $coinValue);
+	/* echo $coinValue2; */
+	$coinValue3 = intval($coinValue2);
+	/* echo $coinValue3; */
+	if ($tokenCount >= $coinValue3) {
+		$newTokenCount = $tokenCount - $coinValue3;
+		$newTokenCountQuery = "UPDATE users SET token=$newTokenCount WHERE userid='$userID'";
+		$newTokenKaydet = mysqli_query($baglanti, $newTokenCountQuery);
+		$jsonKayit = "UPDATE users
 	SET portfolio = JSON_SET(
 		COALESCE(portfolio, '{}'), -- Eğer portföy null ise yeni bir JSON_OBJECT() oluştur
-		'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) + '$phpDegiskeni' -- Eğer BTC.amount null ise 0'a ekle
+		'$.$coinisim.amount', COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(portfolio, '$.$coinisim.amount')) AS DECIMAL(10,2)), 0) + 1.0 -- Eğer BTC.amount null ise 0'a ekle
 	)
 	WHERE userid = $userID";
-			$jsonKaydet = mysqli_query($baglanti, $jsonKayit);
-			//header("Refresh:0");
-			echo '<script>alert(" ' . $phpDegiskeni . ' adet ' .  $coinisim . ' alımınız gerçekleşmiştir!"); </script>';
-		} else {
-
-			echo '<script>alert("Bakiyeniz ' . $phpDegiskeni . ' adet ' .  $coinisim . ' almaya yetmemektedir!"); </script>';
-		}
+		$jsonKaydet = mysqli_query($baglanti, $jsonKayit);
+		header("Refresh:0");
+		echo "Alim gerceklesti";
+	} else {
+		echo "Yetersiz Bakiye";
 	}
 }
 
@@ -150,7 +134,6 @@ mysqli_close($baglanti);
 <head>
 	<base href="">
 	<title>DemoCoin</title>
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta charset="utf-8" />
 	<meta property="og:locale" content="en_US" />
@@ -199,11 +182,10 @@ mysqli_close($baglanti);
 								</button>
 								<!--end::Mobile menu toggle-->
 								<!--begin::Logo image-->
-								<a href="anasayfa.php">
-									<img src="assets/media/logos/logo.png" alt="Logo" class="logo-default h-50px h-lg-60px" />
-									<img alt="Logo" class="logo-sticky h-40px h-lg-25px" />
+								<a href="../../demo1/dist/landing.html">
+									<img alt="Logo" class="logo-default h-25px h-lg-30px" />
+									<img alt="Logo" class="logo-sticky h-20px h-lg-25px" />
 								</a>
-								<p>Veriler 15 Saniyede Bir Güncellenmektedir</p>
 								<!--end::Logo image-->
 							</div>
 							<!--end::Logo-->
@@ -217,24 +199,13 @@ mysqli_close($baglanti);
 							<!--end::Menu wrapper-->
 							<!--begin::Toolbar-->
 							<div class="flex-equal text-end ms-1">
-								<div class="btn-group">
-									<button type="button" class="btn btn-success"><?php echo "Token Count: " . $row['token']; ?></button>
-									<button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-										<span class="visually-hidden"></span>
-									</button>
-									<ul class="dropdown-menu">
-										<li><a class="dropdown-item" href="yukleme.php">
-												<h3>Token Yükle </h3>
-											</a></li>
-										<li><a class="dropdown-item" href="paracek.php">
-												<h3> Token Çek</h3>
-											</a></li>
-									</ul>
-								</div>
+								<a class="btn btn-outline-success "><?php echo "Token Count: " . $row['token']; ?></a>
+								<a href="yukleme.php" class="btn btn-outline-success ">Token Yükle</a>
 								<a href="portfoy.php" class="btn btn-outline-primary "><?php echo $name['isim'];
 																						echo ' ';
-																						echo $surname['soyisim']; ?></a>
-								<a href="logout.php" class="btn btn-outline-danger ">Çıkış Yap</a>
+																						echo $surname['soyisim'];
+																						echo '(Portföyüm)'; ?></a>
+								<a href="logout.php" class="btn btn-outline-primary "> Logout ! </a>
 								<!-- <form action="yukleme.php">
 										<button type='submit' formmethod='post' class='btn btn-outline-success' name='miktar' id='miktar' value=''>Token Yükle</button>
 									</form> -->
@@ -251,7 +222,7 @@ mysqli_close($baglanti);
 				<div class="d-flex flex-column flex-center w-100 min-h-350px min-h-lg-500px px-9">
 					<!--begin::Heading-->
 					<form id="tradeform" method="post" action="anasayfa.php">
-						<table class="table table-rounded table-striped table-light border gy-7 gs-7">
+						<table class="table table-rounded table-striped border gy-7 gs-7">
 							<thead>
 								<tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
 									<th>Coin</th>
@@ -260,8 +231,7 @@ mysqli_close($baglanti);
 									<th>Mevcut Arz</th>
 									<th>İşlem Hacmi (24 Saat)</th>
 									<th>Değişim (24 Saat)</th>
-									<th>işlemler</th>
-									<th>Adet</th>
+									<!-- <th colspan="2">işlemler</th> -->
 								</tr>
 							</thead>
 							<tbody class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
@@ -309,17 +279,24 @@ mysqli_close($baglanti);
 										$cryptoName = mysqli_real_escape_string($baglanti, $crypto['name']);
 										$cryptoValueUSD = $crypto['priceUsd'];
 
+										/* $eklemeSorgusu = "INSERT INTO cryptoDB (cryptoName, cryptoValueUSD) VALUES ('$cryptoName', $cryptoValueUSD)";
+										 // Sorguyu çalıştır ve hata kontrolü yap
+										if (mysqli_query($baglanti, $eklemeSorgusu)) {
+											echo 'Veri başarıyla eklendi: ' . $cryptoName . '<br>';
+										} else {
+											echo 'Hata oluştu: ' . mysqli_error($baglanti) . '<br>';
+										} */
 
 										// Var ise güncelleme sorgusu
 										$guncellemeSorgusu = "UPDATE cryptoDB SET cryptoValueUSD = $cryptoValueUSD WHERE cryptoName = '$cryptoName'";
-
+										
 										// Sorguyu çalıştır ve hata kontrolü yap
 										if (mysqli_query($baglanti, $guncellemeSorgusu)) {
 											/* echo 'Veri başarıyla güncellendi: ' . $cryptoName . '<br>'; */
 										} else {
 											echo 'Hata oluştu: ' . mysqli_error($baglanti) . '<br>';
 										}
-
+										
 
 										echo "<form method='post' action='anasayfa.php'>";
 										echo '<tr id="' . $crypto['id'] . '">';
@@ -328,23 +305,11 @@ mysqli_close($baglanti);
 										echo '<td>' . " " . "$" . number_format($crypto['marketCapUsd']) . " " . "b" . '</td>';
 										echo '<td>' . " " . "$" . number_format($crypto['supply'], 2) . " " . "m" . '</td>';
 										echo '<td>' . " " . "$" . number_format($crypto['volumeUsd24Hr'], 2) . " " . "b" . '</td>';
-
-										$changePercent24Hr = $crypto['changePercent24Hr'];
-										$changePercent24HrFormatted = number_format($changePercent24Hr, 2) . "%";
-
-										// Belirtilen koşula göre yazı rengini ayarla
-										$color = ($changePercent24Hr < 0) ? 'red' : 'green';
-
-										// Yazı rengini uygula
-										echo '<td style="color: ' . $color . ';">' . $changePercent24HrFormatted . '</td>';
-
-
-										
+										echo '<td>' . number_format($crypto['changePercent24Hr'], 2) . "%" . '</td>';
 										echo "<input type='hidden' name='coinname' value='" . $crypto['name'] . "'>";
 										echo "<input type='hidden' name='coinvalue' value='" . number_format($crypto['priceUsd'], 2) . "'>";
-										echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='buy' id='buy' value='Al'>AL</button>" . "<button type='submit' class='btn btn-outline-danger' name='sell' id='sell' value='Sat'>SAT</button>" . '</td>';
-										// echo '<td>' . "<button type='submit' class='btn btn-outline-danger' name='sell' id='sell' value='Sat'>SAT</button>" . '</td>';
-										echo '<td>' . "<input min='1' type='text' pattern='^(0|[1-9]\d*)(\.\d+)?$' title='Sadece sıfırdan büyük sayılar girebilirsiniz.' placeholder='Alım-Satım Adedini Giriniz' class='btn btn-outline-success' name='girdi' id='girdi' required></input>" . '</td>';
+										echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='buy' id='buy' value='Al'>AL</button>" . '</td>';
+										echo '<td>' . "<button type='submit' class='btn btn-outline-success' name='sell' id='sell' value='Sat'>SAT</button>" . '</td>';
 
 										echo "</form>";
 										echo '</tr>';
@@ -416,47 +381,7 @@ mysqli_close($baglanti);
 			} )
 		});
 	</script> -->
-	<script src="https://cdn.botpress.cloud/webchat/v1/inject.js"></script>
-	<script>
-		window.botpressWebChat.init({
-			"composerPlaceholder": "Chat with demo-bot",
-			"botConversationDescription": "Sizlere yardımcı olabilmek için buradayım:)",
-			"botId": "4cd7cf9e-53c3-44b8-9d4c-1b7a70152eab",
-			"hostUrl": "https://cdn.botpress.cloud/webchat/v1",
-			"messagingUrl": "https://messaging.botpress.cloud",
-			"clientId": "4cd7cf9e-53c3-44b8-9d4c-1b7a70152eab",
-			"webhookId": "a895508c-eb12-4c85-81af-12e291f47d03",
-			"lazySocket": true,
-			"themeName": "prism",
-			"botName": "demo-bot",
-			"avatarUrl": "https://d1muf25xaso8hp.cloudfront.net/https%3A%2F%2Fmeta-q.cdn.bubble.io%2Ff1672952221146x417310664985390140%2FChatbot.png?w=&h=&auto=compress&dpr=1&fit=max",
-			"frontendVersion": "v1",
-			"useSessionStorage": true,
-			"enableConversationDeletion": true,
-			"theme": "prism",
-			"themeColor": "#2563eb"
-		});
-	</script>
 
-	<script>
-		// Belirli bir süre aralığında formu yenileyen JavaScript fonksiyonu
-function refreshForm() {
-  // Formu seç
-  var form = document.getElementById('tradeform');
-  
-  // Formu yenileme işlemi
-  function reloadForm() {
-    form.submit();
-  }
-  
-  // 15 saniyede bir formu yenile
-  setInterval(reloadForm, 15000);
-}
-
-// Sayfa yüklendiğinde fonksiyonu çağır
-window.onload = refreshForm;
-
-	</script>
 
 
 </body>

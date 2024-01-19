@@ -9,14 +9,42 @@ $baglanti = mysqli_connect($host, $kullanici, $sifre);
 @mysqli_select_db($baglanti, $veritabani);
 
 if (isset($_POST["kayit"])) {
+
 	$name = $_POST["isim"];
 	$surname = $_POST["soyisim"];
 	$phone = $_POST["telno"];
 	$email = $_POST["email"];
 	$password = $_POST["sifre"];
 
-	$ekle = "INSERT INTO users (isim, soyisim, email, telno, sifre) VALUES ('$name','$surname','$email','$phone','$password')";
-	$calistirekle = mysqli_query($baglanti, $ekle);
+	$mailVarMiQuery = "SELECT email FROM users WHERE email = '$email'";
+	$mailVarMiQueryResult = mysqli_query($baglanti, $mailVarMiQuery);
+
+	$mailVarMiQueryArray = mysqli_fetch_assoc($mailVarMiQueryResult);
+	$mailVarMi = $mailVarMiQueryArray['email'];
+
+
+	if(empty($mailVarMi)){
+
+		$ekle = "INSERT INTO users (isim, soyisim, email, telno, sifre) VALUES ('$name','$surname','$email','$phone','$password')";
+		$calistirekle = mysqli_query($baglanti, $ekle);
+
+		if ($calistirekle) {
+			echo '<script> alert("Kayıt başarılı."); </script>';
+            //echo "Kayıt başarılı.";
+        } else {
+			echo '<script> alert("Kayıt sırasında bir hata oluştu."); </script>';
+			
+            //echo "Kayıt sırasında bir hata oluştu.";
+        }
+		
+
+	} else {
+		echo '<script> alert("Bu e-posta kullanilmaktadir."); </script>';
+		echo "Bu e-posta kullanilmaktadir.";
+	}
+
+
+
 }
 mysqli_close($baglanti);
 ?>
@@ -37,6 +65,7 @@ License: For each use you must have a valid license purchased only from above li
 
 <head>
 	<title>DemoCoin - Kayıt Ol</title>
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<meta name="description" content="The most advanced Bootstrap Admin Theme on Themeforest trusted by 94,000 beginners and professionals. Multi-demo, Dark Mode, RTL support and complete React, Angular, Vue &amp; Laravel versions. Grab your copy now and get life-time updates for free." />
 	<meta name="keywords" content="Metronic, bootstrap, bootstrap 5, Angular, VueJs, React, Laravel, admin themes, web design, figma, web development, free templates, free admin themes, bootstrap theme, bootstrap template, bootstrap dashboard, bootstrap dak mode, bootstrap button, bootstrap datepicker, bootstrap timepicker, fullcalendar, datatables, flaticon" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -90,7 +119,7 @@ License: For each use you must have a valid license purchased only from above li
 				<!--begin::Wrapper-->
 				<div class="w-lg-600px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
 					<!--begin::Form-->
-					<form class="form w-100" novalidate="novalidate" id="kayitform" name="kayitform" action="kayit.php" method="POST">
+					<form class="form w-100"  id="kayitform" name="kayitform" action="kayit.php" method="POST">
 						<!--begin::Heading-->
 						<div class="mb-10 text-center">
 							<!--begin::Title-->
@@ -114,13 +143,13 @@ License: For each use you must have a valid license purchased only from above li
 							<!--begin::Col-->
 							<div class="col-xl-6">
 								<label class="form-label fw-bolder text-dark fs-6">İsim</label>
-								<input class="form-control form-control-lg form-control-solid" type="text" placeholder="" name="isim" id="isim" autocomplete="off" />
+								<input class="form-control form-control-lg form-control-solid" type="text" placeholder="İsminizi Yazınız" name="isim" id="isim" autocomplete="off" pattern="[a-zA-ZğüşıöçĞÜŞİÖÇ]+" min="1" max="30" title="Lütfen geçerli bir isim girin." required>
 							</div>
 							<!--end::Col-->
 							<!--begin::Col-->
 							<div class="col-xl-6">
 								<label class="form-label fw-bolder text-dark fs-6">Soyisim</label>
-								<input class="form-control form-control-lg form-control-solid" type="text" placeholder="" name="soyisim" id="soyisim" autocomplete="off" />
+								<input class="form-control form-control-lg form-control-solid" type="text" placeholder="Lütfen Soyisminizi Giriniz" name="soyisim" id="soyisim" autocomplete="off" pattern="[a-zA-ZğüşıöçĞÜŞİÖÇ]+" min="1" max="30" title="Lütfen geçerli bir soyisim girin." required>
 							</div>
 							<!--end::Col-->
 						</div>
@@ -128,11 +157,11 @@ License: For each use you must have a valid license purchased only from above li
 						<!--begin::Input group-->
 						<div class="fv-row mb-7">
 							<label class="form-label fw-bolder text-dark fs-6">Email</label>
-							<input class="form-control form-control-lg form-control-solid" type="email" placeholder="" name="email" autocomplete="off" />
+							<input class="form-control form-control-lg form-control-solid" type="email" placeholder="Lütfen E-Posta Adresini Giriniz" name="email" minlength="1" autocomplete="off" required>
 						</div>
 						<div class="fv-row mb-7">
 							<label class="form-label fw-bolder text-dark fs-6">Telefon Numarası</label>
-							<input class="form-control form-control-lg form-control-solid" type="tel" placeholder="" name="telno" id="telno" autocomplete="off" />
+							<input class="form-control form-control-lg form-control-solid" type="text" placeholder="Lütfen Telefon Numaranızı Griniz" minlength="1" maxlength="12" name="telno" id="telno" autocomplete="off" required>
 						</div>
 						<!--end::Input group-->
 						<!--begin::Input group-->
@@ -144,7 +173,7 @@ License: For each use you must have a valid license purchased only from above li
 								<!--end::Label-->
 								<!--begin::Input wrapper-->
 								<div class="position-relative mb-3">
-									<input class="form-control form-control-lg form-control-solid" type="password" placeholder="" name="sifre" id="sifre" autocomplete="off" />
+									<input class="form-control form-control-lg form-control-solid" type="password" placeholder="Lütfen En Az 8 Haneli Bir Şifre Giriniz" name="sifre" id="sifre" title="Lütfen En Az 8 Haneli Bir Şifre Giriniz" autocomplete="off" required>
 									<span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" data-kt-password-meter-control="visibility">
 										<i class="bi bi-eye-slash fs-2"></i>
 										<i class="bi bi-eye fs-2 d-none"></i>
